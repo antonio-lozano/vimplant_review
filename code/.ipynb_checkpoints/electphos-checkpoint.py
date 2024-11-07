@@ -214,43 +214,7 @@ def reposition_grid(orig_grid, new_location=None, new_angle=None):
 #######################################
 def implant_grid(gm_mask, orig_grid, start_location, new_angle, offset_from_base):
     '''
-    Determines the optimal insertion point and final position of the center of an electrode grid within the brain 
-    based on a specified angle and target depth, ensuring the grid remains within the brain structure.
-
-    Parameters:
-    -----------
-    gm_mask : array-like
-        3D point cloud representing the grey matter mask of the brain.
-    orig_grid : array-like
-        Original coordinates of the electrode grid points.
-    start_location : tuple
-        Initial insertion point (x, y, z) for the electrode grid.
-    new_angle : tuple
-        Desired orientation angles (in radians) to rotate the grid upon insertion.
-    offset_from_base : float
-        Distance in the z-axis to offset the grid, controlling its depth within the brain.
-
-    Returns:
-    --------
-    ref_contacts_xyz : array-like
-        Transformed coordinates of the electrode grid at the starting location.
-    contacts_xyz_moved : array-like
-        Final coordinates of the electrode grid at the target location within the brain.
-    refline : array-like
-        Original insertion line (before rotation).
-    refline_moved : array-like
-        Insertion line adjusted by `new_angle`.
-    projection : array-like
-        Intersection point of the insertion line with the brain's convex hull.
-    ref_orig : array-like
-        Starting location of the insertion line.
-    ray_visualize : trimesh.Path3D
-        3D representation of the insertion ray for visualization.
-    new_location : array-like
-        Final insertion point within the brain, adjusted by depth offset.
-    grid_valid : bool
-        Indicates if the electrode grid is fully contained within the brain structure.
-
+    # determines the insertion point of the center of the electrode grid, based on angle and target point.
     '''
     
     valid = False
