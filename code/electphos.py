@@ -19,6 +19,7 @@ import math
 from math import radians
 import trimesh # needed for convex hull
 from lossfunc import makeGaussian
+from scipy.spatial import KDTree
 
 ### needed for matrix rotation/translation ect
 from ninimplant import pol2cart, cart2pol,get_xyz,transform,create_cube,cube_from_points,recover_mask_from_points,get_polar_ecc_fromCube,get_translation,translate_cube
@@ -350,6 +351,30 @@ def get_phosphenes(contacts_xyz, good_coords, polar_map, ecc_map, sigma_map):
     phosphenes = np.vstack((phosphenes, rfSizes))
     phosphenes = phosphenes.T
 
+    return phosphenes
+
+def get_phosphenes_fast(contacts_xyz, good_coords, polar_map, ecc_map, sigma_map):
+
+    '''
+
+    exact same I/O as get_phosphenes but faster (optimized and tested code)
+
+    '''
+    contacts_rounded = np.round(contacts_xyz.T).astype(int)
+    good_coords_rounded = np.round(good_coords.T).astype(int)
+
+    # Use KDTree for faster lookup
+    good_coords_tree = KDTree(good_coords_rounded)
+    _, indices = good_coords_tree.query(contacts_rounded, distance_upper_bound=1)
+    valid_indices = indices[indices < len(good_coords_rounded)]
+
+    # Retrieve values from maps
+    xp, yp, zp = good_coords[:, valid_indices]
+    polarAngles = polar_map[xp, yp, zp]
+    eccentricities = ecc_map[xp, yp, zp]
+    rfSizes = sigma_map[xp, yp, zp]
+
+    phosphenes = np.vstack((polarAngles, eccentricities, rfSizes)).T
     return phosphenes
 
 def pol2cart(angle, ecc):

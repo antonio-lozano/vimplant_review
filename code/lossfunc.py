@@ -12,12 +12,12 @@ loss_func.makeGaussian
 
 '''
 
-
 import numpy as np
 from scipy.special import rel_entr
 import math
 import matplotlib.pyplot as plt
 import sys
+from scipy.spatial import KDTree
 
 def hellinger_distance(p, q):
     """
@@ -68,6 +68,38 @@ def get_yield(contacts_xyz, goodcoords, empty_score=1.0):
     contact_hits = len(indices_prf)
     total_points = contacts_xyz.shape[1]
     contacts_yield = (contact_hits / total_points)
+
+    return contacts_yield
+
+
+def get_yield_fast(contacts_xyz, goodcoords, empty_score=1.0):
+    """
+    Optimized yield function using KDTree for spatial queries.
+    
+    Parameters:
+    - contacts_xyz: Array of electrode grid points for which we calculate yield.
+    - goodcoords: Array of all GM voxels containing pRF data.
+    - empty_score: Default score if no points match (1.0 by default).
+
+    Returns:
+    - contacts_yield: Proportion of contact points that intersect with goodcoords.
+    """
+    # Ensure contacts_xyz and goodcoords have compatible shapes
+    contacts_rounded = np.round(contacts_xyz.T).astype(int)  # Shape should be (N, 3)
+    goodcoords_rounded = np.round(goodcoords.T).astype(int)  # Shape should be (N, 3)
+
+    # Build KDTree for good coordinates
+    goodcoords_tree = KDTree(goodcoords_rounded)
+    
+    # Query KDTree for distances within a threshold
+    distances, _ = goodcoords_tree.query(contacts_rounded, distance_upper_bound=1)
+    
+    # Count matches within threshold
+    contact_hits = np.sum(np.isfinite(distances))
+    total_points = contacts_rounded.shape[0]  # Use contacts_rounded since it's already transposed
+    
+    # Calculate yield
+    contacts_yield = contact_hits / total_points if total_points > 0 else empty_score
 
     return contacts_yield
 
